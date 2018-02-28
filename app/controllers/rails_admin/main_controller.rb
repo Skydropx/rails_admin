@@ -128,7 +128,7 @@ module RailsAdmin
       options = options.merge(query: params[:query]) if params[:query].present?
       options = options.merge(filters: params[:f]) if params[:f].present?
       options = options.merge(bulk_ids: params[:bulk_ids]) if params[:bulk_ids]
-      options = options.merge(limit: 10000) if params[:action] == 'export'
+      options = options.merge(limit: 5000) if params[:action] == 'export'
       model_config.abstract_model.all(options, scope)
     end
 
