@@ -9,6 +9,8 @@ module RailsAdmin
     before_action :get_model, except: RailsAdmin::Config::Actions.all(:root).collect(&:action_name)
     before_action :get_object, only: RailsAdmin::Config::Actions.all(:member).collect(&:action_name)
     before_action :check_for_cancel
+    before_action :_change_db!, unless: proc { ENV['RADMIN_DATABASE_URL'].nil? }
+    after_action :_return_db!, unless: proc { ENV['RADMIN_DATABASE_URL'].nil? }
 
     RailsAdmin::Config::Actions.all.each do |action|
       class_eval <<-EOS, __FILE__, __LINE__ + 1
@@ -140,6 +142,14 @@ module RailsAdmin
       action = params[:current_action].in?(%w(create update)) ? params[:current_action] : 'edit'
       @association = source_model_config.send(action).fields.detect { |f| f.name == params[:associated_collection].to_sym }.with(controller: self, object: source_object)
       @association.associated_collection_scope
+    end
+
+    def _change_db!
+      ActiveRecord::Base.establish_connection ENV['RADMIN_DATABASE_URL']
+    end
+
+    def _return_db!
+      ActiveRecord::Base.establish_connection ENV['DATABASE_URL']
     end
   end
 end
